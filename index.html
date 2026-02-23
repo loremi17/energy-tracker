@@ -3,24 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker Energia</title>
+    <title>Tracker Energia Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; color: #333; }
-        h1 { color: #6a1b9a; }
-        .card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; color: #333; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
+        
+        /* Griglia delle Caselle */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        
+        /* Casella Principale Octopus */
+        .card.octopus { background: #e1008f; color: white; transform: scale(1.05); border: 2px solid #c0007a; }
+        .card.octopus h3 { color: white; }
+        
+        /* Casella Mercato */
+        .card.mercato { border-bottom: 4px solid #f39c12; }
+        
+        h3 { margin-top: 0; font-size: 1.1em; color: #7f8c8d; }
+        .price { font-size: 2em; font-weight: bold; margin: 10px 0; }
+        .unit { font-size: 0.4em; font-weight: normal; color: inherit; opacity: 0.8; }
+        .date { font-size: 0.8em; color: #95a5a6; }
+        .card.octopus .date { color: #fdfdfd; }
+        
+        /* Contenitore Grafico */
+        .chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
-    <h1>⚡ Tracker Prezzi Octopus vs Mercato</h1>
-    <div class="card">
+
+    <h1>⚡ Dashboard Prezzi Energia</h1>
+
+    <div class="dashboard-grid">
+        <div class="card octopus">
+            <h3>🐙 Octopus Fissa (Luce)</h3>
+            <div class="price" id="box-octopus">-- <span class="unit">€/kWh</span></div>
+            <div class="date" id="data-aggiornamento">Aggiornato a: --</div>
+        </div>
+        
+        <div class="card mercato">
+            <h3>📈 Mercato (PUN)</h3>
+            <div class="price" id="box-pun">-- <span class="unit">€/kWh</span></div>
+        </div>
+
+        <div class="card">
+            <h3>NeN</h3>
+            <div class="price" id="box-nen">-- <span class="unit">€/kWh</span></div>
+        </div>
+
+        <div class="card">
+            <h3>Enel</h3>
+            <div class="price" id="box-enel">-- <span class="unit">€/kWh</span></div>
+        </div>
+        
+        <div class="card">
+            <h3>Plenitude</h3>
+            <div class="price" id="box-plenitude">-- <span class="unit">€/kWh</span></div>
+        </div>
+    </div>
+
+    <div class="chart-container">
         <canvas id="graficoPrezzi"></canvas>
     </div>
 
     <script>
+        // Funzione per formattare i numeri (es. 0.1045 -> 0,104)
+        function formattaPrezzo(prezzo) {
+            return prezzo ? prezzo.toFixed(4).replace('.', ',') : 'N/D';
+        }
+
         fetch('dati.json')
             .then(response => response.json())
             .then(dati => {
+                if(dati.length === 0) return;
+
+                // Prende l'ultimo dato registrato (quello di oggi)
+                const oggi = dati[dati.length - 1];
+
+                // Aggiorna le caselle con i dati di oggi
+                document.getElementById('data-aggiornamento').innerText = "Aggiornato a: " + oggi.data;
+                document.getElementById('box-octopus').innerHTML = formattaPrezzo(oggi.octopus_luce_fissa) + ' <span class="unit">€/kWh</span>';
+                document.getElementById('box-pun').innerHTML = formattaPrezzo(oggi.pun_mercato) + ' <span class="unit">€/kWh</span>';
+                
+                // I concorrenti potrebbero essere undefined se lo scraper fallisce
+                document.getElementById('box-nen').innerHTML = formattaPrezzo(oggi.nen_luce) + ' <span class="unit">€/kWh</span>';
+                document.getElementById('box-enel').innerHTML = formattaPrezzo(oggi.enel_luce) + ' <span class="unit">€/kWh</span>';
+                document.getElementById('box-plenitude').innerHTML = formattaPrezzo(oggi.plenitude_luce) + ' <span class="unit">€/kWh</span>';
+
+                // --- GESTIONE GRAFICO STORICO ---
                 const date = dati.map(d => d.data);
                 const luceOctopus = dati.map(d => d.octopus_luce_fissa);
                 const mercatoPun = dati.map(d => d.pun_mercato);
@@ -30,9 +100,13 @@
                     data: {
                         labels: date,
                         datasets: [
-                            { label: 'Octopus Luce Fissa (€/kWh)', data: luceOctopus, borderColor: '#e1008f', tension: 0.1 },
-                            { label: 'PUN Mercato (€/kWh)', data: mercatoPun, borderColor: '#f39c12', tension: 0.1 }
+                            { label: '🐙 Octopus Fissa', data: luceOctopus, borderColor: '#e1008f', backgroundColor: 'rgba(225, 0, 143, 0.1)', fill: true, tension: 0.2, borderWidth: 3 },
+                            { label: '📈 PUN Mercato', data: mercatoPun, borderColor: '#f39c12', backgroundColor: 'transparent', tension: 0.2, borderDash: [5, 5] }
                         ]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: { mode: 'index', intersect: false }
                     }
                 });
             });
