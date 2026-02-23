@@ -1,0 +1,36 @@
+name: Tracker Energia Giornaliero
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Gira ogni notte alle 02:00 UTC
+  workflow_dispatch: # Permette l'avvio manuale
+
+jobs:
+  aggiorna-dati:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Conferma i permessi di scrittura
+
+    steps:
+      - name: Clona il repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
+
+      - name: Esegui lo scraper
+        run: python scraper.py
+
+      - name: Salva i dati (Commit & Push)
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add dati.json
+          git commit -m "Aggiornamento prezzi: $(date +'%Y-%m-%d')" || echo "Nessuna modifica da salvare"
+          git push
