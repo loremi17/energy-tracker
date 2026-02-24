@@ -25,13 +25,22 @@ def get_octopus():
         return None
 
 def get_pun():
-    # Per il PUN usiamo un portale informativo affidabile e statico (Luce-gas.it o MercatoElettrico)
     url = "https://luce-gas.it/guida/mercato/pun"
     try:
         res = requests.get(url, headers=HEADERS, timeout=15)
-        # Cerchiamo un prezzo tipico del PUN (es. 0,09 o 0,10) nel testo
-        match = re.search(r"0,\d{3,5}", res.text)
-        return float(match.group(0).replace(',', '.')) if match else None
+        soup = BeautifulSoup(res.text, 'html.parser')
+        testo = soup.get_text(separator=' ')
+        
+        # Rimuoviamo gli spazi multipli per far leggere meglio il testo al robot
+        testo_pulito = re.sub(r'\s+', ' ', testo)
+        
+        # REGEX INTELLIGENTE: Cerca la parola "PUN", scorre in avanti di massimo 150 caratteri
+        # e cattura il primo numero formato da "0, seguito da 3 a 6 cifre".
+        match = re.search(r"PUN.{0,150}?(0,\d{3,6})", testo_pulito, re.IGNORECASE)
+        
+        if match:
+            return float(match.group(1).replace(',', '.'))
+        return None
     except:
         return None
 
