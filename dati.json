@@ -9,10 +9,10 @@
     "data": "2026-02-24",
     "octopus_luce_fissa": 0.1045,
     "pun_mercato": 0.095,
-    "sorgenia_luce": null,
-    "nen_luce": null,
-    "enel_luce": null,
-    "eon_luce": null,
+    "sorgenia_luce": 1.200, // Valore di esempio
+    "nen_luce": 1.500, // Valore di esempio
+    "enel_luce": 1.100, // Valore di esempio
+    "eon_luce": 1.250, // Valore di esempio
     "plenitude_luce": 0.1232,
     "illumia_luce": 0.56128
   }
