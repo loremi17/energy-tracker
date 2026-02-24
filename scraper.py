@@ -25,18 +25,18 @@ def get_octopus():
         return None
 
 def get_pun():
-    url = "https://luce-gas.it/guida/mercato/pun"
+    # Abbiamo cambiato fonte perché luce-gas.it blocca i bot di GitHub
+    url = "https://selectra.net/energia/guide/mercato/pun"
     try:
         res = requests.get(url, headers=HEADERS, timeout=15)
         soup = BeautifulSoup(res.text, 'html.parser')
         testo = soup.get_text(separator=' ')
         
-        # Rimuoviamo gli spazi multipli per far leggere meglio il testo al robot
+        # Rimuoviamo gli spazi multipli
         testo_pulito = re.sub(r'\s+', ' ', testo)
         
-        # REGEX INTELLIGENTE: Cerca la parola "PUN", scorre in avanti di massimo 150 caratteri
-        # e cattura il primo numero formato da "0, seguito da 3 a 6 cifre".
-        match = re.search(r"PUN.{0,150}?(0,\d{3,6})", testo_pulito, re.IGNORECASE)
+        # Cerca la dicitura PUN e cattura il primo numero decimale che trova nelle vicinanze
+        match = re.search(r"PUN.{0,100}?(0,\d{3,5})", testo_pulito, re.IGNORECASE)
         
         if match:
             return float(match.group(1).replace(',', '.'))
