@@ -1,9 +1,14 @@
 [
   {
     "data": "2026-02-23",
-    "octopus_luce_fissa": 0.1045,
-    "octopus_gas_fissa": 0.365,
-    "pun_mercato": 0.095
+    "octopus_luce_fissa": 0.321,
+    "pun_mercato": 0.095,
+    "sorgenia_luce": 1.250, 
+    "nen_luce": 1.400, 
+    "enel_luce": 1.150, 
+    "eon_luce": 1.270, 
+    "plenitude_luce": 0.1232,
+    "illumia_luce": 0.56128
   },
   {
     "data": "2026-02-24",
