@@ -60,6 +60,21 @@
             <h3>Plenitude</h3>
             <div class="price" id="box-plenitude">-- <span class="unit">€/kWh</span></div>
         </div>
+
+        <div class="card">
+            <h3>Sorgenia</h3>
+            <div class="price" id="box-sorgenia">-- <span class="unit">€/kWh</span></div>
+        </div>
+
+        <div class="card">
+            <h3>E.ON</h3>
+            <div class="price" id="box-eon">-- <span class="unit">€/kWh</span></div>
+        </div>
+
+        <div class="card">
+            <h3>Illumia</h3>
+            <div class="price" id="box-illumia">-- <span class="unit">€/kWh</span></div>
+        </div>
     </div>
 
     <div class="chart-container">
@@ -89,11 +104,20 @@
                 document.getElementById('box-nen').innerHTML = formattaPrezzo(oggi.nen_luce) + ' <span class="unit">€/kWh</span>';
                 document.getElementById('box-enel').innerHTML = formattaPrezzo(oggi.enel_luce) + ' <span class="unit">€/kWh</span>';
                 document.getElementById('box-plenitude').innerHTML = formattaPrezzo(oggi.plenitude_luce) + ' <span class="unit">€/kWh</span>';
+                document.getElementById('box-sorgenia').innerHTML = formattaPrezzo(oggi.sorgenia_luce) + ' <span class="unit">€/kWh</span>';
+                document.getElementById('box-eon').innerHTML = formattaPrezzo(oggi.eon_luce) + ' <span class="unit">€/kWh</span>';
+                document.getElementById('box-illumia').innerHTML = formattaPrezzo(oggi.illumia_luce) + ' <span class="unit">€/kWh</span>';
 
                 // --- GESTIONE GRAFICO STORICO ---
                 const date = dati.map(d => d.data);
                 const luceOctopus = dati.map(d => d.octopus_luce_fissa);
                 const mercatoPun = dati.map(d => d.pun_mercato);
+                const luceNen = dati.map(d => d.nen_luce ?? null);
+                const luceEnel = dati.map(d => d.enel_luce ?? null);
+                const lucePlenitude = dati.map(d => d.plenitude_luce ?? null);
+                const luceSorgenia = dati.map(d => d.sorgenia_luce ?? null);
+                const luceEon = dati.map(d => d.eon_luce ?? null);
+                const luceIllumia = dati.map(d => d.illumia_luce ?? null);
 
                 new Chart(document.getElementById('graficoPrezzi'), {
                     type: 'line',
@@ -101,7 +125,13 @@
                         labels: date,
                         datasets: [
                             { label: '🐙 Octopus Fissa', data: luceOctopus, borderColor: '#e1008f', backgroundColor: 'rgba(225, 0, 143, 0.1)', fill: true, tension: 0.2, borderWidth: 3 },
-                            { label: '📈 PUN Mercato', data: mercatoPun, borderColor: '#f39c12', backgroundColor: 'transparent', tension: 0.2, borderDash: [5, 5] }
+                            { label: '📈 PUN Mercato', data: mercatoPun, borderColor: '#f39c12', backgroundColor: 'transparent', tension: 0.2, borderDash: [5, 5] },
+                            { label: 'NeN', data: luceNen, borderColor: '#27ae60', backgroundColor: 'transparent', tension: 0.2, spanGaps: true },
+                            { label: 'Enel', data: luceEnel, borderColor: '#2980b9', backgroundColor: 'transparent', tension: 0.2, spanGaps: true },
+                            { label: 'Plenitude', data: lucePlenitude, borderColor: '#8e44ad', backgroundColor: 'transparent', tension: 0.2, spanGaps: true },
+                            { label: 'Sorgenia', data: luceSorgenia, borderColor: '#16a085', backgroundColor: 'transparent', tension: 0.2, spanGaps: true },
+                            { label: 'E.ON', data: luceEon, borderColor: '#e74c3c', backgroundColor: 'transparent', tension: 0.2, spanGaps: true },
+                            { label: 'Illumia', data: luceIllumia, borderColor: '#d35400', backgroundColor: 'transparent', tension: 0.2, spanGaps: true }
                         ]
                     },
                     options: {
