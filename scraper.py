@@ -24,24 +24,37 @@ def get_octopus():
     except:
         return None
 
-def get_pun():
-    # Abbiamo cambiato fonte perché luce-gas.it blocca i bot di GitHub
-    url = "https://selectra.net/energia/guide/mercato/pun"
+def get_pun_gme():
+    """
+    Recupera il valore del PUN ufficiale del mese in corso
+    direttamente dai dati pubblici (XML) del GME.
+    """
+    # L'URL base dei dati di sintesi mensile del GME
+    url = "https://www.mercatoelettrico.org/it/Statistiche/ME/DatiSintesi.aspx"
+    
     try:
-        res = requests.get(url, headers=HEADERS, timeout=15)
+        # Molto spesso la home del GME pubblica il "PUN Index GME (€/MWh)" 
+        # direttamente in homepage nel widget dei mercati.
+        res = requests.get("https://www.mercatoelettrico.org/it/", headers=HEADERS, timeout=15)
         soup = BeautifulSoup(res.text, 'html.parser')
         testo = soup.get_text(separator=' ')
-        
-        # Rimuoviamo gli spazi multipli
         testo_pulito = re.sub(r'\s+', ' ', testo)
         
-        # Cerca la dicitura PUN e cattura il primo numero decimale che trova nelle vicinanze
-        match = re.search(r"PUN.{0,100}?(0,\d{3,5})", testo_pulito, re.IGNORECASE)
+        # Cerca la stringa esatta usata dal GME: "PUN Index GME (€/MWh)" seguita da un numero
+        match = re.search(r"PUN Index GME\s*\([^)]+\)\s*(\d+,\d{2})", testo_pulito, re.IGNORECASE)
         
         if match:
-            return float(match.group(1).replace(',', '.'))
+            # Il GME fornisce il prezzo in €/MWh (es. 107,46). 
+            # Noi lo convertiamo in €/kWh dividendo per 1000.
+            pun_mwh = float(match.group(1).replace(',', '.'))
+            pun_kwh = pun_mwh / 1000
+            
+            # Arrotondiamo a 4 cifre decimali (es. 0.1075)
+            return round(pun_kwh, 4)
+            
         return None
-    except:
+    except Exception as e:
+        print(f"Errore lettura PUN GME: {e}")
         return None
 
 def get_competitors():
