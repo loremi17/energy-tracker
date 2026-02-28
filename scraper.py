@@ -25,8 +25,8 @@ def get_octopus():
         return None
 
 def get_pun():
-    # Abbiamo cambiato fonte perché luce-gas.it blocca i bot di GitHub
-    url = "https://selectra.net/energia/guide/mercato/pun"
+    # Nuova fonte per aggirare i blocchi: la guida di Facile.it
+    url = "https://www.facile.it/energia-luce-gas/guida/pun-energia.html"
     try:
         res = requests.get(url, headers=HEADERS, timeout=15)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -35,14 +35,16 @@ def get_pun():
         # Rimuoviamo gli spazi multipli
         testo_pulito = re.sub(r'\s+', ' ', testo)
         
-        # Cerca la dicitura PUN e cattura il primo numero decimale che trova nelle vicinanze
-        match = re.search(r"PUN.{0,100}?(0,\d{3,5})", testo_pulito, re.IGNORECASE)
+        # Cerca la dicitura PUN e cattura il primo numero decimale (formato 0,xxx)
+        # Ricerca allargata a 200 caratteri per essere più sicuri
+        match = re.search(r"PUN.{0,200}?(0,\d{3,5})", testo_pulito, re.IGNORECASE)
         
         if match:
             return float(match.group(1).replace(',', '.'))
         return None
     except:
         return None
+        
 def get_competitors():
     urls = {
         "sorgenia_luce": "https://www.sorgenia.it/partnership-offerte-sorgenia-luce-gas-casa",
