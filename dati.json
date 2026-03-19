@@ -262,5 +262,16 @@
     "eon_luce": null,
     "plenitude_luce": 0.1452,
     "illumia_luce": 0.56128
+  },
+  {
+    "data": "2026-03-19",
+    "octopus_luce_fissa": 0.1353,
+    "pun_mercato": null,
+    "sorgenia_luce": null,
+    "nen_luce": null,
+    "enel_luce": null,
+    "eon_luce": null,
+    "plenitude_luce": 0.1452,
+    "illumia_luce": 0.56128
   }
 ]
