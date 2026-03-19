@@ -25,24 +25,32 @@ def get_octopus():
         return None
 
 def get_pun():
-    # Nuova fonte per aggirare i blocchi: la guida di Facile.it
-    url = "https://www.facile.it/energia-luce-gas/guida/pun-energia.html"
+    # Estrazione PUN direttamente dal sito ufficiale del GME
+    url = "https://www.mercatoelettrico.org/it/"
     try:
         res = requests.get(url, headers=HEADERS, timeout=15)
         soup = BeautifulSoup(res.text, 'html.parser')
         testo = soup.get_text(separator=' ')
         
-        # Rimuoviamo gli spazi multipli
+        # Rimuoviamo gli spazi multipli per pulire il testo
         testo_pulito = re.sub(r'\s+', ' ', testo)
         
-        # Cerca la dicitura PUN e cattura il primo numero decimale (formato 0,xxx)
-        # Ricerca allargata a 200 caratteri per essere più sicuri
-        match = re.search(r"PUN.{0,200}?(0,\d{3,5})", testo_pulito, re.IGNORECASE)
+        # Cerca la dicitura esatta usata nella dashboard del GME: "PUN Index GME (€/MWh)"
+        match = re.search(r"PUN Index GME\s*\([^)]+\)\s*(\d+,\d{2})", testo_pulito, re.IGNORECASE)
         
         if match:
-            return float(match.group(1).replace(',', '.'))
+            # 1. Estraiamo il prezzo in MWh (sostituendo la virgola con il punto per Python)
+            pun_mwh = float(match.group(1).replace(',', '.'))
+            
+            # 2. Convertiamo da €/MWh a €/kWh dividendo per 1000
+            pun_kwh = pun_mwh / 1000
+            
+            # 3. Arrotondiamo a 4 cifre decimali (es. 0.1499) per pulizia
+            return round(pun_kwh, 4)
+            
         return None
-    except:
+    except Exception as e:
+        print(f"Errore lettura PUN GME: {e}")
         return None
         
 def get_competitors():
