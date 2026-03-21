@@ -38,7 +38,7 @@ def get_pun():
         match = re.search(r"PUN Index GME\s*\([^)]+\)\s*(\d+,\d{2})", testo, re.IGNORECASE)
         if match:
             pun_mwh = float(match.group(1).replace(',', '.'))
-            return round(pun_mwh / 1000, 4) # Converte in €/kWh
+            return round(pun_mwh / 1000, 4)
     except Exception as e:
         print(f"Piano A (GME) fallito: {e}. Passo al Piano B...")
 
