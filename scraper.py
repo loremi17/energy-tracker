@@ -25,28 +25,43 @@ def get_octopus():
         return None
 
 def get_pun():
+    # PIANO A: Sito Ufficiale GME
     try:
         url_gme = "https://www.mercatoelettrico.org/it/"
-        res = scraper.get(url_gme, timeout=15)
+        res = scraper.get(url_gme, timeout=10)
         soup = BeautifulSoup(res.text, 'html.parser')
         testo = re.sub(r'\s+', ' ', soup.get_text(separator=' '))
         match = re.search(r"PUN Index GME\s*\([^)]+\)\s*(\d+,\d{2})", testo, re.IGNORECASE)
         if match:
             pun_mwh = float(match.group(1).replace(',', '.'))
             return round(pun_mwh / 1000, 4)
-    except Exception as e:
-        print(f"Piano A fallito: {e}")
+    except:
+        pass
 
+    # PIANO B: Facile.it
     try:
         url_facile = "https://www.facile.it/energia-luce-gas/guida/pun-energia.html"
-        res = scraper.get(url_facile, timeout=15)
+        res = scraper.get(url_facile, timeout=10)
         soup = BeautifulSoup(res.text, 'html.parser')
         testo = re.sub(r'\s+', ' ', soup.get_text(separator=' '))
         match = re.search(r"PUN.{0,200}?(0,\d{3,5})", testo, re.IGNORECASE)
         if match:
             return float(match.group(1).replace(',', '.'))
-    except Exception as e:
-        print(f"Piano B fallito: {e}")
+    except:
+        pass
+
+    # PIANO C: Taglialabolletta (Sito leggero, niente blocchi server)
+    try:
+        url_taglia = "https://taglialabolletta.it/andamento-prezzo-energia-elettrica/"
+        res = scraper.get(url_taglia, timeout=10)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        testo = re.sub(r'\s+', ' ', soup.get_text(separator=' '))
+        # Cerca la prima volta che dice "0,xxx" dopo la parola PUN
+        match = re.search(r"PUN.{0,150}?(0,\d{3,5})", testo, re.IGNORECASE)
+        if match:
+            return float(match.group(1).replace(',', '.'))
+    except:
+        pass
         
     return None
 
